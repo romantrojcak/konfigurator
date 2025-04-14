@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konfigurátor nárezových dielcov</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
+    select, input { margin: 5px; }
+    .responsive { overflow-x: auto; }
+    .cena, #celkovaCena { font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h1>Konfigurátor dielcov</h1>
+
+<label for="material">Typ materiálu (hrúbka):</label>
+<select id="material" onchange="updateDekory()">
+  <option value="">-- Vyber --</option>
+  <option value="18">DTD 18mm</option>
+  <option value="36">DTD 36mm</option>
+</select>
+
+<label for="dekor">Dekor:</label>
+<select id="dekor"></select>
+
+<div class="responsive">
+<table id="kusovnik">
+  <thead>
+    <tr>
+      <th>Šírka (mm)</th>
+      <th>Výška (mm)</th>
+      <th>Počet ks</th>
+      <th>Hrana</th>
+      <th>Cena (€)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><input type="number" class="sirka" /></td>
+      <td><input type="number" class="vyska" /></td>
+      <td><input type="number" class="pocet" value="1" /></td>
+      <td>
+        <select class="hrana">
+          <option value="0.3">ABS 0.3mm</option>
+          <option value="0.5">ABS 0.5mm</option>
+          <option value="0.8">ABS 0.8mm</option>
+        </select>
+      </td>
+      <td class="cena">0.00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<button onclick="spocitajCenu()">Spočítaj cenu</button>
+
+<h3>Celková cena: <span id="celkovaCena">0.00</span> €</h3>
+
+<script>
+const dekory = {
+  "18": ["Biela", "Dub Sonoma", "Antracit"],
+  "36": ["Biela Supermat", "Čierna", "Orech"]
+};
+
+function updateDekory() {
+  const material = document.getElementById("material").value;
+  const dekorSelect = document.getElementById("dekor");
+  dekorSelect.innerHTML = "";
+  if (dekory[material]) {
+    dekory[material].forEach(d => {
+      const option = document.createElement("option");
+      option.value = d;
+      option.text = d;
+      dekorSelect.appendChild(option);
+    });
+  }
+}
+
+function spocitajCenu() {
+  const rows = document.querySelectorAll("#kusovnik tbody tr");
+  let total = 0;
+  rows.forEach(row => {
+    const sirka = row.querySelector(".sirka").value;
+    const vyska = row.querySelector(".vyska").value;
+    const pocet = row.querySelector(".pocet").value;
+    const hranaCena = parseFloat(row.querySelector(".hrana").value || 0);
+
+    const plocha = (sirka * vyska) / 1_000_000;
+    const cenaZaM2 = 20;
+    const cenaHrany = ((2 * (parseInt(sirka) + parseInt(vyska)) / 1000) * hranaCena);
+    const cena = (plocha * cenaZaM2 + cenaHrany) * pocet;
+    row.querySelector(".cena").innerText = cena.toFixed(2);
+    total += cena;
+  });
+
+  document.getElementById("celkovaCena").innerText = total.toFixed(2);
+}
+</script>
+
+</body>
+</html>
