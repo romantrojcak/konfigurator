@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Konfigurátor – Kusovník</title>
+    <style>
+        body { font-family: Arial; background: #f5f5f5; padding: 20px; }
+        h2 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #eee; }
+        input[type="number"] { width: 80px; }
+        select { width: 150px; }
+        .total { margin-top: 20px; font-weight: bold; font-size: 18px; }
+        button { margin-top: 15px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+
+<h2>Konfigurátor kusovníka – verzia 2</h2>
+
+<table id="kusovnik">
+    <thead>
+        <tr>
+            <th>Šírka (mm)</th>
+            <th>Výška (mm)</th>
+            <th>Počet kusov</th>
+            <th>Typ dosky</th>
+            <th>ABS hore</th>
+            <th>ABS dole</th>
+            <th>ABS vľavo</th>
+            <th>ABS vpravo</th>
+            <th>Plocha (m²)</th>
+            <th>Cena (€)</th>
+        </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+</table>
+
+<button onclick="pridajRiadok()">+ Pridať diel</button>
+<div class="total">Celková cena: <span id="celkovaCena">0.00</span> €</div>
+
+<script>
+    const cenyDosiek = {
+        "W960": 41,
+        "H1180": 99,
+        "H3303": 69
+    };
+
+    const cenaRezu = 20;
+    const cenyABS = { "0.4": 1.2, "0.8": 1.45, "2": 1.7 };
+    const absHrubka = "0.8"; // pevne nastavené
+
+    function pridajRiadok() {
+        const tbody = document.getElementById("tbody");
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><input type="number" class="sirka" onchange="prepocitaj()"></td>
+            <td><input type="number" class="vyska" onchange="prepocitaj()"></td>
+            <td><input type="number" class="kusy" value="1" onchange="prepocitaj()"></td>
+            <td>
+                <select class="doska" onchange="prepocitaj()">
+                    <option value="W960">W960 – Biela 18mm</option>
+                    <option value="H1180">H1180 – Dub Halifax</option>
+                    <option value="H3303">H3303 – Dub Hamilton</option>
+                </select>
+            </td>
+            <td><input type="checkbox" class="absH" onchange="prepocitaj()"></td>
+            <td><input type="checkbox" class="absD" onchange="prepocitaj()"></td>
+            <td><input type="checkbox" class="absL" onchange="prepocitaj()"></td>
+            <td><input type="checkbox" class="absR" onchange="prepocitaj()"></td>
+            <td class="plocha">0.00</td>
+            <td class="cena">0.00</td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function prepocitaj() {
+        let celkovo = 0;
+        document.querySelectorAll("#tbody tr").forEach(tr => {
+            const sirka = +tr.querySelector(".sirka").value || 0;
+            const vyska = +tr.querySelector(".vyska").value || 0;
+            const kusy = +tr.querySelector(".kusy").value || 0;
+            const doska = tr.querySelector(".doska").value;
+            const cenaDosky = cenyDosiek[doska];
+
+            const plocha = (sirka * vyska * kusy) / 1000000;
+            tr.querySelector(".plocha").innerText = plocha.toFixed(2);
+
+            let absMm = 0;
+            if (tr.querySelector(".absH").checked) absMm += sirka;
+            if (tr.querySelector(".absD").checked) absMm += sirka;
+            if (tr.querySelector(".absL").checked) absMm += vyska;
+            if (tr.querySelector(".absR").checked) absMm += vyska;
+
+            const cenaABS = (absMm / 1000) * cenyABS[absHrubka];
+            const cena = (plocha * cenaDosky) + cenaRezu + cenaABS;
+
+            tr.querySelector(".cena").innerText = cena.toFixed(2);
+            celkovo += cena;
+        });
+        document.getElementById("celkovaCena").innerText = celkovo.toFixed(2);
+    }
+
+    window.onload = pridajRiadok;
+</script>
+
+</body>
+</html>
