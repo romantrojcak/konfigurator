@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Konfigurátor nárezových dielcov</title>
+  <title>Konfigurátor dielcov v3</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
     table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
     select, input { margin: 5px; }
     .responsive { overflow-x: auto; }
     .cena, #celkovaCena { font-weight: bold; }
+    button { margin: 5px; }
   </style>
 </head>
 <body>
@@ -40,30 +41,31 @@
       <th>Šírka (mm)</th>
       <th>Výška (mm)</th>
       <th>Počet ks</th>
-      <th>Hrana</th>
+      <th>Hrana Ľ</th>
+      <th>Hrana P</th>
+      <th>Hrana H</th>
+      <th>Hrana D</th>
       <th>Cena (€)</th>
+      <th>Akcia</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td><input type="number" class="sirka" /></td>
-      <td><input type="number" class="vyska" /></td>
-      <td><input type="number" class="pocet" value="1" /></td>
-      <td>
-        <select class="hrana">
-          <option value="0.3">ABS 0.3mm</option>
-          <option value="0.5">ABS 0.5mm</option>
-          <option value="0.8">ABS 0.8mm</option>
-        </select>
-      </td>
+      <td><input type="number" class="sirka" oninput="spocitajCenu()" /></td>
+      <td><input type="number" class="vyska" oninput="spocitajCenu()" /></td>
+      <td><input type="number" class="pocet" value="1" oninput="spocitajCenu()" /></td>
+      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
       <td class="cena">0.00</td>
+      <td><button onclick="odstranitRiadok(this)">X</button></td>
     </tr>
   </tbody>
 </table>
 </div>
 
 <button onclick="pridatRiadok()">+ Pridať diel</button>
-<button onclick="spocitajCenu()">Spočítaj cenu</button>
 
 <h3>Celková cena: <span id="celkovaCena">0.00</span> €</h3>
 
@@ -98,13 +100,19 @@ function spocitajCenu() {
   const rows = document.querySelectorAll("#kusovnik tbody tr");
   let total = 0;
   rows.forEach(row => {
-    const sirka = row.querySelector(".sirka").value;
-    const vyska = row.querySelector(".vyska").value;
-    const pocet = row.querySelector(".pocet").value;
-    const hranaCena = parseFloat(row.querySelector(".hrana").value || 0);
+    const sirka = parseFloat(row.querySelector(".sirka").value) || 0;
+    const vyska = parseFloat(row.querySelector(".vyska").value) || 0;
+    const pocet = parseInt(row.querySelector(".pocet").value) || 0;
+
+    let hrany = row.querySelectorAll("select");
+    let cenaHrany = 0;
+    hrany.forEach(select => {
+      cenaHrany += parseFloat(select.value || 0);
+    });
+
+    const obvod = (sirka + vyska) * 2 / 1000;
     const plocha = (sirka * vyska) / 1_000_000;
     const cenaZaM2 = 20;
-    const cenaHrany = ((2 * (parseInt(sirka) + parseInt(vyska)) / 1000) * hranaCena);
     const cena = (plocha * cenaZaM2 + cenaHrany) * pocet;
     row.querySelector(".cena").innerText = cena.toFixed(2);
     total += cena;
@@ -115,9 +123,18 @@ function spocitajCenu() {
 function pridatRiadok() {
   const tbody = document.querySelector("#kusovnik tbody");
   const novyRiadok = tbody.rows[0].cloneNode(true);
-  novyRiadok.querySelectorAll("input").forEach(input => input.value = "");
+  novyRiadok.querySelectorAll("input").forEach(input => input.value = input.classList.contains("pocet") ? "1" : "");
   novyRiadok.querySelector(".cena").innerText = "0.00";
   tbody.appendChild(novyRiadok);
+}
+
+function odstranitRiadok(button) {
+  const row = button.closest("tr");
+  const tbody = row.parentNode;
+  if (tbody.rows.length > 1) {
+    row.remove();
+    spocitajCenu();
+  }
 }
 </script>
 
