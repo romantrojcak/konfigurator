@@ -16,6 +16,13 @@
 
 <h1>Konfigurátor dielcov</h1>
 
+<label for="vyrobca">Výrobca:</label>
+<select id="vyrobca" onchange="updateDekory()">
+  <option value="">-- Vyber --</option>
+  <option value="egger">Egger</option>
+  <option value="kronospan">Kronospan</option>
+</select>
+
 <label for="material">Typ materiálu (hrúbka):</label>
 <select id="material" onchange="updateDekory()">
   <option value="">-- Vyber --</option>
@@ -55,22 +62,30 @@
 </table>
 </div>
 
+<button onclick="pridatRiadok()">+ Pridať diel</button>
 <button onclick="spocitajCenu()">Spočítaj cenu</button>
 
 <h3>Celková cena: <span id="celkovaCena">0.00</span> €</h3>
 
 <script>
 const dekory = {
-  "18": ["Biela", "Dub Sonoma", "Antracit"],
-  "36": ["Biela Supermat", "Čierna", "Orech"]
+  "egger": {
+    "18": ["Biela", "Dub Bardolino", "Antracit"],
+    "36": ["Biela Premium", "Čierna Mat", "Orech Dijon"]
+  },
+  "kronospan": {
+    "18": ["Biela K001", "Dub Natural", "Šedá U112"],
+    "36": ["Čierna K003", "Orech H373", "Béžová"]
+  }
 };
 
 function updateDekory() {
-  const material = document.getElementById("material").value;
+  const vyrobca = document.getElementById("vyrobca").value;
+  const hrubka = document.getElementById("material").value;
   const dekorSelect = document.getElementById("dekor");
   dekorSelect.innerHTML = "";
-  if (dekory[material]) {
-    dekory[material].forEach(d => {
+  if (vyrobca && dekory[vyrobca] && dekory[vyrobca][hrubka]) {
+    dekory[vyrobca][hrubka].forEach(d => {
       const option = document.createElement("option");
       option.value = d;
       option.text = d;
@@ -87,7 +102,6 @@ function spocitajCenu() {
     const vyska = row.querySelector(".vyska").value;
     const pocet = row.querySelector(".pocet").value;
     const hranaCena = parseFloat(row.querySelector(".hrana").value || 0);
-
     const plocha = (sirka * vyska) / 1_000_000;
     const cenaZaM2 = 20;
     const cenaHrany = ((2 * (parseInt(sirka) + parseInt(vyska)) / 1000) * hranaCena);
@@ -95,8 +109,15 @@ function spocitajCenu() {
     row.querySelector(".cena").innerText = cena.toFixed(2);
     total += cena;
   });
-
   document.getElementById("celkovaCena").innerText = total.toFixed(2);
+}
+
+function pridatRiadok() {
+  const tbody = document.querySelector("#kusovnik tbody");
+  const novyRiadok = tbody.rows[0].cloneNode(true);
+  novyRiadok.querySelectorAll("input").forEach(input => input.value = "");
+  novyRiadok.querySelector(".cena").innerText = "0.00";
+  tbody.appendChild(novyRiadok);
 }
 </script>
 
