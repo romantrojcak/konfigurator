@@ -3,36 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Konfigurátor dielcov v3</title>
+  <title>Konfigurátor v4</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f2f2f2; }
     table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
     select, input { margin: 5px; }
     .responsive { overflow-x: auto; }
     .cena, #celkovaCena { font-weight: bold; }
-    button { margin: 5px; }
+    .form-group { margin-bottom: 10px; }
   </style>
 </head>
 <body>
 
-<h1>Konfigurátor dielcov</h1>
+<h1>Konfigurátor dielcov – verzia 4</h1>
 
-<label for="vyrobca">Výrobca:</label>
-<select id="vyrobca" onchange="updateDekory()">
-  <option value="">-- Vyber --</option>
-  <option value="egger">Egger</option>
-  <option value="kronospan">Kronospan</option>
-</select>
+<div class="form-group">
+  <label for="material">Typ materiálu:</label>
+  <select id="material" onchange="updateDekory()">
+    <option value="">-- Vyber --</option>
+    <option value="18egger">18 Egger</option>
+  </select>
+</div>
 
-<label for="material">Typ materiálu (hrúbka):</label>
-<select id="material" onchange="updateDekory()">
-  <option value="">-- Vyber --</option>
-  <option value="18">DTD 18mm</option>
-  <option value="36">DTD 36mm</option>
-</select>
+<div class="form-group">
+  <label for="filterDekor">Vyhľadať dekor:</label>
+  <input type="text" id="filterDekor" oninput="filterDekory()" placeholder="Zadaj názov dekoru...">
+</div>
 
-<label for="dekor">Dekor:</label>
-<select id="dekor"></select>
+<div class="form-group">
+  <label for="dekor">Dekor:</label>
+  <select id="dekor"></select>
+</div>
 
 <div class="responsive">
 <table id="kusovnik">
@@ -41,12 +42,7 @@
       <th>Šírka (mm)</th>
       <th>Výška (mm)</th>
       <th>Počet ks</th>
-      <th>Hrana Ľ</th>
-      <th>Hrana P</th>
-      <th>Hrana H</th>
-      <th>Hrana D</th>
       <th>Cena (€)</th>
-      <th>Akcia</th>
     </tr>
   </thead>
   <tbody>
@@ -54,12 +50,7 @@
       <td><input type="number" class="sirka" oninput="spocitajCenu()" /></td>
       <td><input type="number" class="vyska" oninput="spocitajCenu()" /></td>
       <td><input type="number" class="pocet" value="1" oninput="spocitajCenu()" /></td>
-      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
       <td class="cena">0.00</td>
-      <td><button onclick="odstranitRiadok(this)">X</button></td>
     </tr>
   </tbody>
 </table>
@@ -71,28 +62,38 @@
 
 <script>
 const dekory = {
-  "egger": {
-    "18": ["Biela", "Dub Bardolino", "Antracit"],
-    "36": ["Biela Premium", "Čierna Mat", "Orech Dijon"]
-  },
-  "kronospan": {
-    "18": ["Biela K001", "Dub Natural", "Šedá U112"],
-    "36": ["Čierna K003", "Orech H373", "Béžová"]
-  }
+  "18egger": [
+    "W980 Biela",
+    "H3331 Dub Nebraska",
+    "U999 Čierna",
+    "H3730 Orech Dijon",
+    "U708 Svetlosivá"
+  ]
 };
 
 function updateDekory() {
-  const vyrobca = document.getElementById("vyrobca").value;
-  const hrubka = document.getElementById("material").value;
+  const material = document.getElementById("material").value;
   const dekorSelect = document.getElementById("dekor");
   dekorSelect.innerHTML = "";
-  if (vyrobca && dekory[vyrobca] && dekory[vyrobca][hrubka]) {
-    dekory[vyrobca][hrubka].forEach(d => {
+
+  if (dekory[material]) {
+    dekory[material].forEach(d => {
       const option = document.createElement("option");
       option.value = d;
       option.text = d;
       dekorSelect.appendChild(option);
     });
+  }
+
+  filterDekory(); // aplikuj filter aj po zmene materiálu
+}
+
+function filterDekory() {
+  const filter = document.getElementById("filterDekor").value.toLowerCase();
+  const dekorSelect = document.getElementById("dekor");
+  for (let i = 0; i < dekorSelect.options.length; i++) {
+    const option = dekorSelect.options[i];
+    option.style.display = option.text.toLowerCase().includes(filter) ? "" : "none";
   }
 }
 
@@ -103,17 +104,9 @@ function spocitajCenu() {
     const sirka = parseFloat(row.querySelector(".sirka").value) || 0;
     const vyska = parseFloat(row.querySelector(".vyska").value) || 0;
     const pocet = parseInt(row.querySelector(".pocet").value) || 0;
-
-    let hrany = row.querySelectorAll("select");
-    let cenaHrany = 0;
-    hrany.forEach(select => {
-      cenaHrany += parseFloat(select.value || 0);
-    });
-
-    const obvod = (sirka + vyska) * 2 / 1000;
     const plocha = (sirka * vyska) / 1_000_000;
     const cenaZaM2 = 20;
-    const cena = (plocha * cenaZaM2 + cenaHrany) * pocet;
+    const cena = plocha * cenaZaM2 * pocet;
     row.querySelector(".cena").innerText = cena.toFixed(2);
     total += cena;
   });
@@ -126,15 +119,6 @@ function pridatRiadok() {
   novyRiadok.querySelectorAll("input").forEach(input => input.value = input.classList.contains("pocet") ? "1" : "");
   novyRiadok.querySelector(".cena").innerText = "0.00";
   tbody.appendChild(novyRiadok);
-}
-
-function odstranitRiadok(button) {
-  const row = button.closest("tr");
-  const tbody = row.parentNode;
-  if (tbody.rows.length > 1) {
-    row.remove();
-    spocitajCenu();
-  }
 }
 </script>
 
