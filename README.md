@@ -1,1 +1,1 @@
-# konfigurator
+# index.html.
