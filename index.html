@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Konfigurátor v4</title>
+  <title>Konfigurátor dielcov v5</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f2f2f2; }
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
     table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
     select, input { margin: 5px; }
     .responsive { overflow-x: auto; }
     .cena, #celkovaCena { font-weight: bold; }
     .form-group { margin-bottom: 10px; }
+    button { margin: 5px; }
   </style>
 </head>
 <body>
 
-<h1>Konfigurátor dielcov – verzia 4</h1>
+<h1>Konfigurátor dielcov – verzia 5</h1>
 
 <div class="form-group">
   <label for="material">Typ materiálu:</label>
@@ -42,7 +43,12 @@
       <th>Šírka (mm)</th>
       <th>Výška (mm)</th>
       <th>Počet ks</th>
+      <th>Hrana Ľ</th>
+      <th>Hrana P</th>
+      <th>Hrana H</th>
+      <th>Hrana D</th>
       <th>Cena (€)</th>
+      <th>Akcia</th>
     </tr>
   </thead>
   <tbody>
@@ -50,7 +56,12 @@
       <td><input type="number" class="sirka" oninput="spocitajCenu()" /></td>
       <td><input type="number" class="vyska" oninput="spocitajCenu()" /></td>
       <td><input type="number" class="pocet" value="1" oninput="spocitajCenu()" /></td>
+      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
       <td class="cena">0.00</td>
+      <td><button onclick="odstranitRiadok(this)">X</button></td>
     </tr>
   </tbody>
 </table>
@@ -85,7 +96,7 @@ function updateDekory() {
     });
   }
 
-  filterDekory(); // aplikuj filter aj po zmene materiálu
+  filterDekory();
 }
 
 function filterDekory() {
@@ -104,9 +115,14 @@ function spocitajCenu() {
     const sirka = parseFloat(row.querySelector(".sirka").value) || 0;
     const vyska = parseFloat(row.querySelector(".vyska").value) || 0;
     const pocet = parseInt(row.querySelector(".pocet").value) || 0;
+    let hrany = row.querySelectorAll("select");
+    let cenaHrany = 0;
+    hrany.forEach(select => {
+      cenaHrany += parseFloat(select.value || 0);
+    });
     const plocha = (sirka * vyska) / 1_000_000;
     const cenaZaM2 = 20;
-    const cena = plocha * cenaZaM2 * pocet;
+    const cena = (plocha * cenaZaM2 + cenaHrany) * pocet;
     row.querySelector(".cena").innerText = cena.toFixed(2);
     total += cena;
   });
@@ -119,6 +135,15 @@ function pridatRiadok() {
   novyRiadok.querySelectorAll("input").forEach(input => input.value = input.classList.contains("pocet") ? "1" : "");
   novyRiadok.querySelector(".cena").innerText = "0.00";
   tbody.appendChild(novyRiadok);
+}
+
+function odstranitRiadok(button) {
+  const row = button.closest("tr");
+  const tbody = row.parentNode;
+  if (tbody.rows.length > 1) {
+    row.remove();
+    spocitajCenu();
+  }
 }
 </script>
 
