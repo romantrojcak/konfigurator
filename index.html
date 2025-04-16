@@ -2,86 +2,85 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Konfigurátor dielcov v7</title>
+  <title>Konfigurátor dielcov v6 s náhľadom</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; display: flex; flex-wrap: wrap; gap: 40px; background: #f4f4f4; }
-    .form-section, .preview-section { flex: 1 1 45%; min-width: 300px; }
-    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 5px; }
-    select, input, textarea { margin: 5px; }
-    .cena, #celkovaCena { font-weight: bold; }
-    .preview-box { border: 1px solid #999; background: #fff; position: relative; width: 300px; height: 250px; margin-top: 20px; }
-    .doska { position: absolute; top: 30px; left: 30px; background: #ddd; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .flex { display: flex; gap: 40px; flex-wrap: wrap; }
+    .form, .preview { flex: 1 1 45%; }
+    .preview-box { width: 300px; height: 250px; border: 1px solid #aaa; position: relative; display: none; background: #f4f4f4; }
+    .doska { background: #ccc; position: absolute; }
     .hrana { position: absolute; background: red; }
-    .top    { top: 0; left: 0; height: 5px; width: 100%; }
+    .top { top: 0; left: 0; height: 5px; width: 100%; }
     .bottom { bottom: 0; left: 0; height: 5px; width: 100%; }
-    .left   { top: 0; left: 0; width: 5px; height: 100%; }
-    .right  { top: 0; right: 0; width: 5px; height: 100%; }
+    .left { top: 0; left: 0; width: 5px; height: 100%; }
+    .right { top: 0; right: 0; width: 5px; height: 100%; }
   </style>
 </head>
 <body>
 
-<div class="form-section">
-  <fieldset>
-    <legend><strong>Vaše údaje</strong></legend>
-    <input type="text" placeholder="Meno a priezvisko" style="width: 95%;"><br>
-    <input type="tel" placeholder="Telefón" style="width: 95%;"><br>
-    <input type="email" placeholder="E-mail" style="width: 95%;"><br>
-    <textarea rows="3" placeholder="Poznámka k objednávke" style="width: 95%;"></textarea>
-  </fieldset>
+<div class="flex">
+  <div class="form">
+    <fieldset>
+      <legend>Vaše údaje</legend>
+      <input type="text" placeholder="Meno a priezvisko"><br>
+      <input type="tel" placeholder="Telefón"><br>
+      <input type="email" placeholder="E-mail"><br>
+      <textarea placeholder="Poznámka" rows="3" cols="40"></textarea>
+    </fieldset>
 
-  <table id="kusovnik">
-    <thead>
-      <tr>
-        <th>Šírka (mm)</th>
-        <th>Výška (mm)</th>
-        <th>Hrana Ľ</th>
-        <th>Hrana P</th>
-        <th>Hrana H</th>
-        <th>Hrana D</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><input type="number" class="sirka" oninput="updatePreview()"></td>
-        <td><input type="number" class="vyska" oninput="updatePreview()"></td>
-        <td><select class="hranaL" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-        <td><select class="hranaP" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-        <td><select class="hranaH" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-        <td><select class="hranaD" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    <table id="kusovnik">
+      <thead>
+        <tr>
+          <th>Šírka</th><th>Výška</th><th>Hrana Ľ</th><th>Hrana P</th><th>Hrana H</th><th>Hrana D</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="number" class="sirka" oninput="updatePreview()"></td>
+          <td><input type="number" class="vyska" oninput="updatePreview()"></td>
+          <td><select class="hranaL" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+          <td><select class="hranaP" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+          <td><select class="hranaH" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+          <td><select class="hranaD" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-<div class="preview-section">
-  <h3>Náhľad dielca</h3>
-  <div class="preview-box" id="previewBox">
-    <div id="doska" class="doska"></div>
-    <div id="hranaT" class="hrana top" style="display:none;"></div>
-    <div id="hranaB" class="hrana bottom" style="display:none;"></div>
-    <div id="hranaL" class="hrana left" style="display:none;"></div>
-    <div id="hranaR" class="hrana right" style="display:none;"></div>
+  <div class="preview">
+    <h3>Náhľad dielca</h3>
+    <div id="preview" class="preview-box">
+      <div id="doska" class="doska"></div>
+      <div id="hranaT" class="hrana top"></div>
+      <div id="hranaB" class="hrana bottom"></div>
+      <div id="hranaL" class="hrana left"></div>
+      <div id="hranaR" class="hrana right"></div>
+    </div>
   </div>
 </div>
 
 <script>
 function updatePreview() {
-  const sirka = parseInt(document.querySelector(".sirka").value) || 0;
-  const vyska = parseInt(document.querySelector(".vyska").value) || 0;
+  const sirka = parseInt(document.querySelector(".sirka").value);
+  const vyska = parseInt(document.querySelector(".vyska").value);
+  const box = document.getElementById("preview");
   const doska = document.getElementById("doska");
 
-  const maxW = 240;
-  const maxH = 180;
-  const scale = Math.min(maxW / sirka, maxH / vyska) || 1;
+  if (sirka > 0 && vyska > 0) {
+    box.style.display = "block";
+    const scale = Math.min(240 / sirka, 180 / vyska);
+    doska.style.width = (sirka * scale) + "px";
+    doska.style.height = (vyska * scale) + "px";
+    doska.style.left = (30) + "px";
+    doska.style.top = (30) + "px";
 
-  doska.style.width = (sirka * scale) + "px";
-  doska.style.height = (vyska * scale) + "px";
-
-  document.getElementById("hranaL").style.display = document.querySelector(".hranaL").value !== "0" ? "block" : "none";
-  document.getElementById("hranaR").style.display = document.querySelector(".hranaP").value !== "0" ? "block" : "none";
-  document.getElementById("hranaT").style.display = document.querySelector(".hranaH").value !== "0" ? "block" : "none";
-  document.getElementById("hranaB").style.display = document.querySelector(".hranaD").value !== "0" ? "block" : "none";
+    document.getElementById("hranaL").style.display = document.querySelector(".hranaL").value !== "0" ? "block" : "none";
+    document.getElementById("hranaR").style.display = document.querySelector(".hranaP").value !== "0" ? "block" : "none";
+    document.getElementById("hranaT").style.display = document.querySelector(".hranaH").value !== "0" ? "block" : "none";
+    document.getElementById("hranaB").style.display = document.querySelector(".hranaD").value !== "0" ? "block" : "none";
+  } else {
+    box.style.display = "none";
+  }
 }
 </script>
 
