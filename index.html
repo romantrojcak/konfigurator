@@ -3,162 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Konfigurátor dielcov v6</title>
+  <title>Konfigurátor dielcov v7</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
-    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
+    body { font-family: Arial, sans-serif; padding: 20px; display: flex; flex-wrap: wrap; gap: 40px; background: #f4f4f4; }
+    .form-section, .preview-section { flex: 1 1 45%; min-width: 300px; }
+    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 5px; }
     select, input, textarea { margin: 5px; }
-    .responsive { overflow-x: auto; }
     .cena, #celkovaCena { font-weight: bold; }
-    .form-group { margin-bottom: 10px; }
-    button { margin: 5px; }
-    fieldset { margin-bottom: 20px; padding: 10px; }
+    .preview-box { border: 1px solid #999; background: #fff; position: relative; width: 300px; height: 250px; margin-top: 20px; }
+    .doska { position: absolute; top: 30px; left: 30px; background: #ddd; }
+    .hrana { position: absolute; background: red; }
+    .top    { top: 0; left: 0; height: 5px; width: 100%; }
+    .bottom { bottom: 0; left: 0; height: 5px; width: 100%; }
+    .left   { top: 0; left: 0; width: 5px; height: 100%; }
+    .right  { top: 0; right: 0; width: 5px; height: 100%; }
   </style>
 </head>
 <body>
 
-<h1>Konfigurátor dielcov – verzia 6</h1>
+<div class="form-section">
+  <fieldset>
+    <legend><strong>Vaše údaje</strong></legend>
+    <input type="text" placeholder="Meno a priezvisko" style="width: 95%;"><br>
+    <input type="tel" placeholder="Telefón" style="width: 95%;"><br>
+    <input type="email" placeholder="E-mail" style="width: 95%;"><br>
+    <textarea rows="3" placeholder="Poznámka k objednávke" style="width: 95%;"></textarea>
+  </fieldset>
 
-<fieldset>
-  <legend><strong>Vaše údaje</strong></legend>
-  <div class="form-group">
-    <label for="meno">Meno a priezvisko:</label><br>
-    <input type="text" id="meno" placeholder="Zadajte meno a priezvisko" style="width: 300px;">
-  </div>
-  <div class="form-group">
-    <label for="telefon">Telefón:</label><br>
-    <input type="tel" id="telefon" placeholder="Zadajte telefónne číslo" style="width: 300px;">
-  </div>
-  <div class="form-group">
-    <label for="email">E-mail:</label><br>
-    <input type="email" id="email" placeholder="Zadajte e-mail" style="width: 300px;">
-  </div>
-  <div class="form-group">
-    <label for="poznamka">Poznámka:</label><br>
-    <textarea id="poznamka" rows="3" cols="50" placeholder="Voliteľná poznámka k objednávke"></textarea>
-  </div>
-</fieldset>
-
-<div class="form-group">
-  <label for="material">Typ materiálu:</label>
-  <select id="material" onchange="updateDekory()">
-    <option value="">-- Vyber --</option>
-    <option value="18egger">18 Egger</option>
-  </select>
+  <table id="kusovnik">
+    <thead>
+      <tr>
+        <th>Šírka (mm)</th>
+        <th>Výška (mm)</th>
+        <th>Hrana Ľ</th>
+        <th>Hrana P</th>
+        <th>Hrana H</th>
+        <th>Hrana D</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><input type="number" class="sirka" oninput="updatePreview()"></td>
+        <td><input type="number" class="vyska" oninput="updatePreview()"></td>
+        <td><select class="hranaL" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+        <td><select class="hranaP" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+        <td><select class="hranaH" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+        <td><select class="hranaD" onchange="updatePreview()"><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
-<div class="form-group">
-  <label for="filterDekor">Vyhľadať dekor:</label>
-  <input type="text" id="filterDekor" oninput="filterDekory()" placeholder="Zadaj názov dekoru...">
+<div class="preview-section">
+  <h3>Náhľad dielca</h3>
+  <div class="preview-box" id="previewBox">
+    <div id="doska" class="doska"></div>
+    <div id="hranaT" class="hrana top" style="display:none;"></div>
+    <div id="hranaB" class="hrana bottom" style="display:none;"></div>
+    <div id="hranaL" class="hrana left" style="display:none;"></div>
+    <div id="hranaR" class="hrana right" style="display:none;"></div>
+  </div>
 </div>
-
-<div class="form-group">
-  <label for="dekor">Dekor:</label>
-  <select id="dekor"></select>
-</div>
-
-<div class="responsive">
-<table id="kusovnik">
-  <thead>
-    <tr>
-      <th>Šírka (mm)</th>
-      <th>Výška (mm)</th>
-      <th>Počet ks</th>
-      <th>Hrana Ľ</th>
-      <th>Hrana P</th>
-      <th>Hrana H</th>
-      <th>Hrana D</th>
-      <th>Cena (€)</th>
-      <th>Akcia</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><input type="number" class="sirka" oninput="spocitajCenu()" /></td>
-      <td><input type="number" class="vyska" oninput="spocitajCenu()" /></td>
-      <td><input type="number" class="pocet" value="1" oninput="spocitajCenu()" /></td>
-      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-      <td><select onchange='spocitajCenu()'><option value='0'>Žiadna</option><option value='0.4'>0,4 mm</option><option value='0.8'>0,8 mm</option><option value='2'>2 mm</option></select></td>
-      <td class="cena">0.00</td>
-      <td><button onclick="odstranitRiadok(this)">X</button></td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<button onclick="pridatRiadok()">+ Pridať diel</button>
-
-<h3>Celková cena: <span id="celkovaCena">0.00</span> €</h3>
 
 <script>
-const dekory = {
-  "18egger": [
-    "W980 Biela", "H3331 Dub Nebraska", "U999 Čierna", "H3730 Orech Dijon", "U708 Svetlosivá"
-  ]
-};
+function updatePreview() {
+  const sirka = parseInt(document.querySelector(".sirka").value) || 0;
+  const vyska = parseInt(document.querySelector(".vyska").value) || 0;
+  const doska = document.getElementById("doska");
 
-function updateDekory() {
-  const material = document.getElementById("material").value;
-  const dekorSelect = document.getElementById("dekor");
-  dekorSelect.innerHTML = "";
-  if (dekory[material]) {
-    dekory[material].forEach(d => {
-      const option = document.createElement("option");
-      option.value = d;
-      option.text = d;
-      dekorSelect.appendChild(option);
-    });
-  }
-  filterDekory();
-}
+  const maxW = 240;
+  const maxH = 180;
+  const scale = Math.min(maxW / sirka, maxH / vyska) || 1;
 
-function filterDekory() {
-  const filter = document.getElementById("filterDekor").value.toLowerCase();
-  const dekorSelect = document.getElementById("dekor");
-  for (let i = 0; i < dekorSelect.options.length; i++) {
-    const option = dekorSelect.options[i];
-    option.style.display = option.text.toLowerCase().includes(filter) ? "" : "none";
-  }
-}
+  doska.style.width = (sirka * scale) + "px";
+  doska.style.height = (vyska * scale) + "px";
 
-function spocitajCenu() {
-  const rows = document.querySelectorAll("#kusovnik tbody tr");
-  let total = 0;
-  rows.forEach(row => {
-    const sirka = parseFloat(row.querySelector(".sirka").value) || 0;
-    const vyska = parseFloat(row.querySelector(".vyska").value) || 0;
-    const pocet = parseInt(row.querySelector(".pocet").value) || 0;
-    let hrany = row.querySelectorAll("select");
-    let cenaHrany = 0;
-    hrany.forEach(select => {
-      cenaHrany += parseFloat(select.value || 0);
-    });
-    const plocha = (sirka * vyska) / 1_000_000;
-    const cenaZaM2 = 20;
-    const cena = (plocha * cenaZaM2 + cenaHrany) * pocet;
-    row.querySelector(".cena").innerText = cena.toFixed(2);
-    total += cena;
-  });
-  document.getElementById("celkovaCena").innerText = total.toFixed(2);
-}
-
-function pridatRiadok() {
-  const tbody = document.querySelector("#kusovnik tbody");
-  const novyRiadok = tbody.rows[0].cloneNode(true);
-  novyRiadok.querySelectorAll("input").forEach(input => input.value = input.classList.contains("pocet") ? "1" : "");
-  novyRiadok.querySelector(".cena").innerText = "0.00";
-  tbody.appendChild(novyRiadok);
-}
-
-function odstranitRiadok(button) {
-  const row = button.closest("tr");
-  const tbody = row.parentNode;
-  if (tbody.rows.length > 1) {
-    row.remove();
-    spocitajCenu();
-  }
+  document.getElementById("hranaL").style.display = document.querySelector(".hranaL").value !== "0" ? "block" : "none";
+  document.getElementById("hranaR").style.display = document.querySelector(".hranaP").value !== "0" ? "block" : "none";
+  document.getElementById("hranaT").style.display = document.querySelector(".hranaH").value !== "0" ? "block" : "none";
+  document.getElementById("hranaB").style.display = document.querySelector(".hranaD").value !== "0" ? "block" : "none";
 }
 </script>
 
